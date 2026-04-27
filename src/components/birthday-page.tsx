@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { motion } from "motion/react";
 import { Heart, Star } from "lucide-react";
 import { Footer } from "./common/footer";
@@ -8,6 +9,51 @@ interface BirthdayPageProps {
 }
 
 export function BirthdayPage({ name, targetDate }: BirthdayPageProps) {
+  // Use a ref to keep track of the audio object across renders
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    // Use the path that worked in your browser test
+    const audio = new Audio("song.mp3");
+    audio.loop = true;
+    audioRef.current = audio;
+
+    const handleUserInteraction = async () => {
+      if (audioRef.current) {
+        try {
+          await audioRef.current.play();
+          console.log("Music started successfully!");
+          // Remove listeners once it starts so we don't keep calling play()
+          removeListeners();
+        } catch (err) {
+          console.error("Playback still failed:", err);
+        }
+      }
+    };
+
+    const removeListeners = () => {
+      window.removeEventListener("click", handleUserInteraction);
+      window.removeEventListener("touchstart", handleUserInteraction);
+      window.removeEventListener("keydown", handleUserInteraction);
+    };
+
+    // 1. Try to play immediately (works if they already interacted with a previous page)
+    handleUserInteraction();
+
+    // 2. Add listeners for the first interaction on this page
+    window.addEventListener("click", handleUserInteraction);
+    window.addEventListener("touchstart", handleUserInteraction);
+    window.addEventListener("keydown", handleUserInteraction);
+
+    return () => {
+      removeListeners();
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, []);
+
   return (
     <main className="min-h-screen relative overflow-x-hidden selection:bg-primary-container selection:text-primary">
       <Hero name={name} />
@@ -36,7 +82,7 @@ const Hero = ({ name }: Pick<BirthdayPageProps, "name">) => {
           Happy Birthday, <br /> {`My ${name}`}
         </h1>
         <div className="w-24 h-px bg-primary mx-auto opacity-20"></div>
-        <p className="font-sans text-lg md:text-xl text-on-surface-variant max-w-lg mb-12 italic leading-relaxed opacity-90 mx-auto md:mx-0">
+        <p className="font-sans text-lg md:text-xl text-on-surface-variant max-w-lg mb-12 italic leading-relaxed opacity-90 mx-auto">
           To the one who colors my world with shades I never knew existed.
           Today, we celebrate the light you bring to every soul you touch.
         </p>
@@ -101,33 +147,35 @@ const LetterSection = ({
 
             <div className="font-sans text-lg text-on-surface-variant leading-relaxed space-y-6 italic">
               <p>
-                There are moments in life that feel like they were written in
-                the stars long before we arrived to live them. Meeting you was
-                the most beautiful sentence in my life's story. As you celebrate
-                another year of life, I found myself looking back through the
-                chapters we've written together.
+                Meeting you was the most beautiful sentence in the story of my
+                life. And as you turn another page today, I find myself
+                revisiting all the moments that made us us.
               </p>
               <p>
-                I remember the way the light caught your eyes during that first
-                summer evening in Paris—how the world seemed to go quiet just so
-                I could hear you laugh. You have this incredible way of making
-                the mundane feel miraculous, of turning a simple Tuesday into a
-                memory I want to keep forever.
+                I still remember the day we crossed that quiet line between
+                friendship and something deeper. The feeling of finally being
+                able to call you mine is something I’ll carry with me forever.
+                There’s so much I want to tell you about how deeply I admire you
+                and love you—but I’ll save some of those words for our next
+                Valentine’s.
               </p>
               <p>
-                This year has been a testament to your strength and your
-                unwavering kindness. You navigate the world with a quiet luxury
-                of spirit that I admire more than words can express. You are my
-                anchor, my muse, and my greatest adventure.
+                This past year hasn’t been easy for you, I know that. But even
+                through the pressure, the stress, and the moments that felt
+                overwhelming—you’ve shown a kind of strength that amazes me. Not
+                loud or dramatic, but steady, graceful, and real. You keep
+                going, and that’s something I admire more than I can ever fully
+                put into words.
               </p>
               <p>
-                May this year bring you as much joy as you give to everyone
-                around you. May your path be lined with the same warmth you
-                offer so freely. I am so lucky to walk beside you.
+                I hope this year is gentler with you. I hope it brings you peace
+                on the days you need it most, confidence when you doubt
+                yourself, and happiness that feels effortless. You deserve all
+                of that—and so much more. And no matter what comes, just know
+                this: you’re not alone in any of it. I’m right here, always.
               </p>
-
               <div className="pt-8 text-left">
-                <p className="italic">With all my love, forever,</p>
+                <p className="italic">Happy Birthday, my love.</p>
                 <p className="text-4xl font-serif text-primary mt-2">
                   ~ Pathor
                 </p>
@@ -143,31 +191,28 @@ const LetterSection = ({
 const Gallery = () => {
   const images = [
     {
-      src: "https://lh3.googleusercontent.com/aida-public/AB6AXuCiN7GIPbP0sZ7cWdAIlfBsqVbmaSvye7usrZr65h_90mCp5YGcqphcB4O3MMkEZ8Gl5swoFA0YuVZebNEjGVu7KJXtqK6prQ9C2qKFGRZOmOX35ZYJmjGU-CUowKj_CBb2RJStWnmbQbfP6LzGgBcUB8sRe4HYFgbOR4ZxGytmBiJ5XWFkxR1IKSUFLOeczO8mj00F_xJf8Zr7lOC-qhvbjAPmb9s9WF1I4nHvA00kx-D6MAZ7fVkJ4JH3iHuDqZJvt8HVNJfNYZvJ",
-      alt: "Couple laughing on balcony",
-      caption: "Amalfi Coast, 2023",
+      src: "Together1.jpeg",
+      alt: "Dhobighat, Barrackpore, 2025",
+      caption: "Dhobighat, Barrackpore, 2025",
       className: "md:col-span-8 md:row-span-2 h-[500px] md:h-auto",
     },
     {
-      src: "https://lh3.googleusercontent.com/aida-public/AB6AXuCOHCq8_wIuXdx5qBoMiqPWdOG0muKwSKedMbmQ1_A3y6awLfb_y-J5TN5-mum6pX4syIZT15vKE72o3is_3EKvhSagLNjdLYY_ukBUEhJDYoDBiENEh-77NEzoQaBoYAoATEGDZvrSrrzsXacS5azYB4a_pqxr0TFIoDV61ShnsD5asYHQLf3OiOb5Hl7ttDvS67sHoBqCzgu4bNJhI3d7qqe5f8YIAOjUL6JFSDA-l3BFsvLygXLokuzLw02OuytjfnPYEPeUkHkw",
-      alt: "Intertwined hands at cafe",
-      className: "md:col-span-4 h-[300px] md:h-auto",
+      src: "Together2.jpeg",
+      alt: "Shantiniketan, 2024",
+      caption: "Shantiniketan, 2024",
+      className: "md:col-span-4 md:row-span-2 h-[600px] md:h-auto",
     },
     {
-      src: "https://lh3.googleusercontent.com/aida-public/AB6AXuC-y2_fJ4gnvx2zeMBwGWxgQkkEix05Lk8mWaqLbkMJWywLOXqsW2-JFZI5IwVWU7IzHpqXODBXgltem8rMdiSZmdN0DeO2MjaQv861XDN1DyDJOp6D0QN8DTDSN7WdFUVtcq6zeTeq4pOINngg949-77wHjFklJd-nrHuZ0VmdxoL9f0xhJ7p5kDr_kPDx19Q3ELu2ZpFMoLuE9NPJEgWA1cPJRniAUmMa9vYIxTooK631VzXM9GMmbs3U-VhovPo5yIuDhn4pOKpG",
-      alt: "Misty forest",
-      className: "md:col-span-4 h-[300px] md:h-auto",
+      src: "Together3.jpeg",
+      alt: "OG By The Lake, Kolkata, 2025",
+      caption: "OG By The Lake, Kolkata, 2025",
+      className: "md:col-span-4 h-[600px] md:h-auto",
     },
     {
-      src: "https://lh3.googleusercontent.com/aida-public/AB6AXuAj8NHHHgRBI2mFqk6zwBmDM4k20HZ9ZlYh9llE7angWeMr3MXi6JSC_i9YBDyQMtxcYmwI68tFr5suGgokWPwwn8QLM-yGlut3FrTCbZDwFkSURBcXttoD02uiQv3-eeePKSfwTHiFdJZid0HnCJBcWglA7VHwJWKlgq-reHos3KXAUmdphddpwpAvtFXH1-6Fg0CywR2JJv807Y5g6MBoix5V2TqMUFs1BgqaiBz0m-1PwQCC4GMMB1HoQzT3tOJ8tI246tEHSL9_",
-      alt: "Vintage library",
-      className: "md:col-span-4 h-[300px] md:h-auto",
-    },
-    {
-      src: "https://lh3.googleusercontent.com/aida-public/AB6AXuBn49xQQ201gEI6MfbEZxhUvHaCkVx2lJXRBUWFbq_sVE4QlwLTyXQe9Yrr76aZj6RifY-jPHOnslfPAzlAxfTPsAZa5DUCn06SwGIygQbHzHlVxI7UlMjSIojJ-4UfkJceOt5XOh2fbPcVqqURYzvEVy7_mj1HKujcK8TJZoVlO6QkdGMR9T9L3DKCnfSp2Mtjaa_oVccF4vpo5HDDpZLeq7pS2uMO9MW-LMlMK8PHKYDNsLtH7U7_pwPWAIu3YcauPAjhiXeitIRe",
-      alt: "Champagne bubbles",
-      caption: "New Year's Eve, London",
-      className: "md:col-span-8 h-[300px] md:h-auto",
+      src: "Together4.jpeg",
+      alt: "Mani Square, Kolkata, 2024",
+      caption: "Mani Square, Kolkata, 2024",
+      className: "md:col-span-8 h-[600px] md:h-auto",
     },
   ];
 
